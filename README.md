@@ -1,7 +1,7 @@
 dl-translate
 ============
 
-An [Enlightware software](https://enlightware.ch).
+An [Enlightware® software](https://enlightware.ch).
 
 A Rust-based CLI to query a translation from [DeepL](https://www.deepl.com) using an API key.
 
