@@ -5,7 +5,11 @@ authors = ["Stéphane Magnenat <stephane.magnenat@enlightware.ch>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
 description = "A Rust-based CLI to query DeepL using an API key"
+repository = "https://github.com/enlightware/dl-translate"
+homepage = "https://github.com/enlightware/dl-translate"
 readme = "README.md"
+keywords = ["translator", "DeepL", "cli"]
+categories = ["command-line-utilities", "localization", "internationalization", "text-processing"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
