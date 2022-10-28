@@ -1,6 +1,11 @@
 use anyhow::{anyhow, Result};
+use atty::Stream;
 use serde::Deserialize;
-use std::{env, fs, process::exit};
+use std::{
+    env, fs,
+    io::{self, Read},
+    process::exit,
+};
 
 #[derive(Deserialize)]
 struct Config {
@@ -23,6 +28,7 @@ fn translate(
     target_lang: &str,
     source_lang: Option<&String>,
     formality: Option<&String>,
+    human_print: bool,
 ) -> Result<()> {
     let filename = dirs::config_dir()
         .ok_or_else(|| anyhow!("Cannot get config file directory"))?
@@ -49,24 +55,45 @@ fn translate(
         .send()?;
     let json = res.json::<TranslationAnswer>()?;
     for translation in json.translations {
-        println!(
-            "{} (from {})",
-            translation.text, translation.detected_source_language
-        );
+        if human_print {
+            println!(
+                "{} (from {})",
+                translation.text, translation.detected_source_language
+            );
+        } else {
+            print!("{}", translation.text);
+        }
     }
     Ok(())
 }
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    if args.len() < 3 {
-        println!(
-            "Not enough argument, usage: {} TEXT TARGET_LANG [SOURCE_LANG] [more/less (FORMALITY)]",
-            &args[0]
-        );
-        exit(1);
-    }
-    if let Err(err) = translate(&args[1], &args[2], args.get(3), args.get(4)) {
+    let stdin_not_redirected = atty::is(Stream::Stdin);
+    let result = if stdin_not_redirected {
+        if args.len() < 3 {
+            println!(
+                "Not enough argument, usage: {} TEXT TARGET_LANG [SOURCE_LANG] [more/less (FORMALITY)]",
+                &args[0]
+            );
+            exit(1);
+        }
+        translate(&args[1], &args[2], args.get(3), args.get(4), true)
+    } else {
+        if args.len() < 2 {
+            println!(
+                "Not enough argument, usage: {} TARGET_LANG [SOURCE_LANG] [more/less (FORMALITY)]",
+                &args[0]
+            );
+            exit(1);
+        }
+        let mut text = String::new();
+        io::stdin()
+            .read_to_string(&mut text)
+            .expect("Cannot read redirected input");
+        translate(&text, &args[1], args.get(2), args.get(3), false)
+    };
+    if let Err(err) = result {
         println!("Error during translation: {}", err);
         exit(2);
     }
