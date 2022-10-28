@@ -19,12 +19,12 @@ struct TranslationAnswer {
 }
 
 fn translate(text: &str, target_lang: &str, source_lang: Option<&String>, formality: Option<&String>)-> Result<()>  {
-    let filename = dirs::config_dir().ok_or(anyhow!("Cannot get config file directory"))?.join("dl-translate.toml");
+    let filename = dirs::config_dir().ok_or_else(|| anyhow!("Cannot get config file directory"))?.join("dl-translate.toml");
     let contents = fs::read_to_string(&filename).map_err(|old| anyhow!("Cannot open config file {:?}: {}", &filename, old))?;
     let config = toml::from_str::<Config>(&contents)?;
     let client = reqwest::blocking::Client::new();
     let form = reqwest::blocking::multipart::Form::new()
-        .text("auth_key", String::from(config.auth_key))
+        .text("auth_key", config.auth_key)
         .text("text", String::from(text))
         .text("target_lang", String::from(target_lang));
     let form = match source_lang {
