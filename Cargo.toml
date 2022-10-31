@@ -2,7 +2,7 @@
 name = "dl-translate"
 version = "0.1.0"
 authors = ["Stéphane Magnenat <stephane.magnenat@enlightware.ch>"]
-edition = "2018"
+edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "A Rust-based CLI to query DeepL using an API key"
 repository = "https://github.com/enlightware/dl-translate"
