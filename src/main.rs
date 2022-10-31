@@ -1,5 +1,6 @@
 use anyhow::{anyhow, Result};
 use atty::Stream;
+use reqwest::header::AUTHORIZATION;
 use serde::Deserialize;
 use std::{
     env, fs,
@@ -38,7 +39,6 @@ fn translate(
     let config = toml::from_str::<Config>(&contents)?;
     let client = reqwest::blocking::Client::new();
     let form = reqwest::blocking::multipart::Form::new()
-        .text("auth_key", config.auth_key)
         .text("text", String::from(text))
         .text("target_lang", String::from(target_lang));
     let form = match source_lang {
@@ -51,6 +51,7 @@ fn translate(
     };
     let res = client
         .post("https://api.deepl.com/v2/translate")
+        .header(AUTHORIZATION, format!("DeepL-Auth-Key {}", config.auth_key))
         .multipart(form)
         .send()?;
     let json = res.json::<TranslationAnswer>()?;
