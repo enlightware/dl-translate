@@ -1,3 +1,8 @@
+## Unreleased
+
+- Clarified README.
+- Print error if HTTPS call was not a success.
+
 ## 0.2.0
 
 - Updated to Rust 2021.

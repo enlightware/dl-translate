@@ -54,6 +54,12 @@ fn translate(
         .header(AUTHORIZATION, format!("DeepL-Auth-Key {}", config.auth_key))
         .multipart(form)
         .send()?;
+    if !res.status().is_success() {
+        return Err(anyhow!(
+            "Error during translation: {}",
+            res.text().unwrap_or_else(|_| String::from("Unknown error"))
+        ));
+    }
     let json = res.json::<TranslationAnswer>()?;
     for translation in json.translations {
         if human_print {
@@ -73,7 +79,7 @@ fn main() {
     let stdin_not_redirected = atty::is(Stream::Stdin);
     let result = if stdin_not_redirected {
         if args.len() < 3 {
-            println!(
+            eprintln!(
                 "Not enough argument, usage: {} TEXT TARGET_LANG [SOURCE_LANG] [more/less (FORMALITY)]",
                 &args[0]
             );
@@ -82,7 +88,7 @@ fn main() {
         translate(&args[1], &args[2], args.get(3), args.get(4), true)
     } else {
         if args.len() < 2 {
-            println!(
+            eprintln!(
                 "Not enough argument, usage: {} TARGET_LANG [SOURCE_LANG] [more/less (FORMALITY)]",
                 &args[0]
             );
@@ -95,7 +101,7 @@ fn main() {
         translate(&text, &args[1], args.get(2), args.get(3), false)
     };
     if let Err(err) = result {
-        println!("Error during translation: {}", err);
+        eprintln!("Error during translation: {}", err);
         exit(2);
     }
 }
